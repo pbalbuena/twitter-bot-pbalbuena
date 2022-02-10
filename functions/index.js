@@ -1,3 +1,5 @@
+const dodenv = require('dotenv').config()
+
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const { ref } = require("firebase-functions/v1/database");
@@ -8,19 +10,21 @@ const dbRef = admin.firestore().doc('tokens/demo');
 //initialize twitter api
 const twitterApi = require('twitter-api-v2').default;
 const twitterClient = new twitterApi({
-    clientId: 'enRVWE1hVXhkVlAtcHNNMW04S1E6MTpjaQ',
-    clientSecret: '2fF1WuOfEWaBgjnEIBJda0M7yCvwAOumqRJT89PtaZjuJQvY3m',
+    clientId: process.env.TWITTER_USER,
+    clientSecret: process.env.TWITTER_SECRET,
 });
 
 const callbackURL = 'http://127.0.0.1:5000/twitter-bot-pbalbuena/us-central1/callback';
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+
+//initialize openai api
+
+const {Configuration, OpenAIApi } = require('openai');
+const configuration = new Configuration({
+    organization: process.env.OPENAI_USER,
+    apiKey: process.env.OPENAI_SECRET,
+});
+const openai = new OpenAIApi(configuration);
 
 // STEP 1 - Auth URL
 exports.auth = functions.https.onRequest(async (request, response) => {
@@ -79,7 +83,17 @@ exports.tweet = functions.https.onRequest(async (request, response) => {
         accessToken, refreshToken: newRefreshToken
     });
 
-    const {data} = await refreshedClient.v2.me();
+    const nextTweet = await openai.createCompletion('text-davinci-001',{
+        prompt: 'tweet something nice',
+        max_tokens: 64,
+    });
+
+    const {data} = await refreshedClient.v2.tweet(
+        nextTweet.data.choices[0].text
+    )
+
     response.send(data);
 }
+
+
 );
