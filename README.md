@@ -33,7 +33,7 @@ npm install
 Crear un archivo .env e introducir las claves que hemos copiado antes con este formato:
 ```
 OPENAI_USER=xxxxxxxxxxxxxxx
-OPENAI_SECRET=sk-xxxxxxxxxx
+OPENAI_SECRET=xxxxxxxxxxxxx
 TWITTER_USER=xxxxxxxxxxxxxx
 TWITTER_SECRET=xxxxxxxxxxxx
 ```
